@@ -17,7 +17,7 @@ unsigned int wait_time = 0;
 unsigned long current_time = 0,last_time = 0;
 bool active = false;
 void loop(){
-  distance = sensor.Distance();
+  distance = sensor.Distance() / 1.2;
   
   wait_time = map(distance,min_dist,max_dist,min_wait,max_wait);
   wait_time = constrain(wait_time,min_wait,max_wait);
