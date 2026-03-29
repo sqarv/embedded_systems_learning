@@ -1,20 +1,10 @@
-## Simple distance-based alert system using HC-SR04 and an Active Buzzer.
+# Learning Embedded Systems ✏️
+A collection of small projects focused on learning electronics, microcontrollers, and firmware development.
 
-### Features
-- Measures distance from 3 to 500cm.
-- Beep frequency and volume increase as objects get closer.
+## 📁 Projects Index
+* **01-Parking-Sensor** - Distance sensing with ultrasonic signals and buzzers.
+* **02-IR-LED-Control** - Remote control logic with PWM and step acceleration.
 
-### Components
-- Arduino Uno
-- HC-SR04 ultrasonic sensor
-- Active Buzzer
-<table>
-  <tr>
-    <td><b>Circuit Diagram</b></td>
-    <td><b>Circuit</b></td>
-  </tr>
-  <tr>
-    <td><img src="circuit_diagram.png" width="450"></td>
-    <td><img src="circuit.jpeg" width="450"></td>
-  </tr>
-</table>
+## 🛠️ Tech Stack
+* **Hardware:** Arduino, Sensors (IR, Ultrasonic, LDR).
+* **Skills:** C++ (Arduino).
