@@ -5,6 +5,10 @@
     // MAIN SETUP
 void setup()
 {
+    //arduino led
+    pinMode(LED_BUILTIN,OUTPUT);
+    digitalWrite(LED_BUILTIN,LOW);
+    
     // power setup
     pinMode(POWER_PIN, OUTPUT);
     digitalWrite(POWER_PIN, LOW);
@@ -19,43 +23,66 @@ void setup()
 //GLOBAL
 GameState CURRENT_STATE = OFF;
 int8_t LEDS_SEQUENCE[100];
-int sequence_length = 0;
-int sequence_pos = 0;
+int sequence_length = 0 ; /// length of LEDS_SEQUENCE vector
+int sequence_pos = 0; /// vector index of the current led in sequence
 
-int led_pins[] = {RED_LED,YELLOW_LED,GREEN_LED,BLUE_LED}; /// used leds
-int n_pins = sizeof(led_pins) / sizeof(int); /// number of leds used
+int LED_PINS[] = {RED_LED,YELLOW_LED,GREEN_LED,BLUE_LED}; /// used leds
+int n_pins = sizeof(LED_PINS) / sizeof(int); /// number of leds used
 int current_led = 0; /// current led index in led_pins array
 unsigned long last_time = millis();
 
 //SETTINGS
-int start_animation_led_time_ms = 100; ///led light duration in start animation
+int start_animation_led_time_ms = 200; ///led light duration in start animation
 int start_disp_delay = 1000;
 
 //FUNCTIONS
-void start_led(int frequency){
+void start_led(int led_idx){
     noTone(BUZZER_PIN);
-    turn_led(led_pins[current_led],start_animation_led_time_ms);
-    tone(BUZZER_PIN,frequency,start_animation_led_time_ms);
+    turn_led(LED_PINS[led_idx],start_animation_led_time_ms);
+    int freq_idx = led_idx < n_frequencies ? led_idx : 0;
+    tone(BUZZER_PIN,BUZZER_FREQUENCIES[freq_idx],start_animation_led_time_ms);
 }
 
-bool play_led_sequence(int next_led,bool run_condition){
-    bool current_led_status = get_led_status(led_pins[current_led]);
-    if (run_condition && !current_led_status){
-        current_led = next_led;
-        start_led(BUZZER_FREQUENCIES[current_led]);
+struct play_response{
+  bool ended;
+  bool next_led;  
+};
+play_response play_led_sequence(int first_led,int next_led,bool run_condition){
+    play_response response{false,false};
+    
+    if(current_led == -1){
+        current_led = first_led;
+        start_led(current_led);
     }
-    return !run_condition && !current_led_status;
+    else{
+        bool current_led_status = get_led_status(LED_PINS[current_led]);
+    
+        if (run_condition && !current_led_status){
+            current_led = next_led;
+            start_led(current_led);
+            response.next_led = true;
+        }
+        
+        response.ended = !run_condition && !current_led_status;
+        if(response.ended){
+            current_led = -1;
+        }
+    }
+
+    
+    return response;
 }
 
 void set_power(bool set_on)
 {
     if (set_on){
-        current_led = 0;
-        start_led(BUZZER_FREQUENCIES[current_led]);
+        current_led = -1;
+        digitalWrite(LED_BUILTIN,HIGH);
     }
     else{
         digitalWrite(POWER_PIN,LOW);
         noTone(BUZZER_PIN);
+        digitalWrite(LED_BUILTIN,LOW);
     }
 }
 
@@ -75,17 +102,15 @@ void loop()
     }
     
     //LEDS HANDLER
-    check_leds(led_pins,n_pins,CURRENT_STATE == OFF);
-    
-    Serial.println(CURRENT_STATE);
+    check_leds(LED_PINS,n_pins,CURRENT_STATE == OFF);
     
     // state switch
     switch (CURRENT_STATE)
     {
     case START:
         //START ANIMATION
-        bool finished = play_led_sequence(current_led + 1,current_led < n_pins-1);
-        if(finished){
+        play_response response = play_led_sequence(0,current_led + 1,current_led < n_pins-1);
+        if(response.ended){
             CURRENT_STATE = DISP;
             sequence_pos = 0;
             increase_sequence();
@@ -96,7 +121,10 @@ void loop()
     case DISP:
         if(millis() - last_time > start_disp_delay){
             //display the sequence
-            bool finished = play_led_sequence(LEDS_SEQUENCE[sequence_pos + 1],sequence_pos < sequence_length - 1);
+            play_response response = play_led_sequence(LEDS_SEQUENCE[0],LEDS_SEQUENCE[sequence_pos + 1],sequence_pos < sequence_length - 1);
+            if(response.next_led){
+                sequence_pos++;
+            }
         }
     
         break;

@@ -27,3 +27,4 @@ const int BUZZER_FREQUENCIES[4] = {
     400, // led_3
     450 // led_4
 };
+const int n_frequencies = sizeof(BUZZER_FREQUENCIES) / sizeof(int); // length of buzzer_frequencies vector
