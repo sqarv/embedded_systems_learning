@@ -3,12 +3,12 @@
 #include "configuration.hpp"
 
 //BUTTONS HANDLER
-const int8_t n = 20;
+const uint8_t n = 20;
 bool button_status[n];
-int button_debounce[n];
-int debounce_time_ms = 100;
+unsigned long button_debounce[n];
+unsigned int debounce_time_ms = 100;
 
-button_response button_handler(short int button_pin, bool display_input)
+button_response button_handler(uint8_t button_pin, bool display_input)
 {
     bool pressed = !digitalRead(button_pin);
     bool updated = false;
