@@ -17,7 +17,8 @@ enum GameState {
     START,
     DISP,
     CHECK_INPUT,
-    SEQUENCE_END
+    SEQUENCE_END,
+    STATES_COUNT
 };
 
 // BUZZER SOUNDS
