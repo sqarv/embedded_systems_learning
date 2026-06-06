@@ -20,23 +20,21 @@ void setup()
 }
 
     // MAIN LOOP
-//GLOBAL
-GameState CURRENT_STATE = OFF;
-bool STATES_STATUS[STATES_COUNT];
-int8_t LEDS_SEQUENCE[100];
+    //GLOBAL
+//states
+GameState CURRENT_STATE = OFF; /// current state of the game
+bool STATES_STATUS[STATES_COUNT]; /// status of every state
+//sequence
+int8_t LEDS_SEQUENCE[100]; /// stores leds idx in the sequence
 int sequence_length = 0 ; /// length of LEDS_SEQUENCE vector
 int sequence_pos = 0; /// vector index of the current led in sequence
-
-int LED_PINS[] = {RED_LED,YELLOW_LED,GREEN_LED,BLUE_LED}; /// used leds
-int n_pins = sizeof(LED_PINS) / sizeof(int); /// number of leds used
+//led pins
+int LED_PINS[] = {RED_LED,YELLOW_LED,GREEN_LED,BLUE_LED}; /// used led pins
+const int n_pins = sizeof(LED_PINS) / sizeof(int); /// number of leds used
 int current_led = 0; /// current led index in led_pins array
+button_response LED_INPUT_RESPONSES[n_pins]; /// button response for led pins
+//other
 unsigned long last_time = millis();
-
-    //SETTINGS
-unsigned int start_led_time = 200; ///led light duration in start animation
-unsigned int disp_led_time = 400;
-unsigned int disp_led_delay = 200;
-unsigned int start_disp_delay = 1000;
 
     //FUNCTIONS
 // SET STATE
@@ -48,8 +46,8 @@ bool set_state(GameState state,bool status){
 }    
 
 // GET BUZZER FREQUENCY FUNCTION
-int get_buzzer_frequency(int led_idx){
-    int freq_idx = led_idx < n_frequencies ? led_idx : 0;
+int get_buzzer_frequency(int idx){
+    int freq_idx = idx < n_frequencies ? idx : 0;
     return BUZZER_FREQUENCIES[freq_idx];
 }
 
@@ -90,6 +88,15 @@ play_response play_led_sequence(bool start_sequence,int first_led,int next_led,b
     return response;
 }
 
+// SEQUENCE FUNCTIONS
+void clear_sequence(){
+    sequence_length = 0;
+}
+
+void increase_sequence(){
+    LEDS_SEQUENCE[sequence_length++] = rand() % n_pins;
+}
+
 // SET POWER FUNCTION
 void set_power(bool set_on)
 {
@@ -106,13 +113,9 @@ void set_power(bool set_on)
         
         digitalWrite(LED_BUILTIN,LOW); // BUILDIN LED for debugging
         digitalWrite(POWER_PIN,LOW);
-        noTone(BUZZER_PIN); // disable the buzzer
-        sequence_length = 0; // clear the sequence
+        tone(BUZZER_PIN,get_buzzer_frequency(n_frequencies),500); // off sound
+        clear_sequence(); // clear the sequence
     }
-}
-
-void increase_sequence(){
-    LEDS_SEQUENCE[sequence_length++] = rand() % n_pins;
 }
 
     //LOOP
@@ -143,9 +146,6 @@ void loop()
             
             //START ANIMATION
             play_response response = play_led_sequence(updated,0,current_led + 1,current_led < n_pins-1,start_led_time);
-            if(response.next_led){
-                last_time = millis();
-            }
             if(response.ended && (millis() - last_time) > (start_disp_delay + start_led_time)){ // START state ENDED
                 Serial.println("START_END");
                 set_state(START,false);
@@ -163,17 +163,21 @@ void loop()
                 set_leds_mode(LED_PINS,n_pins,OUTPUT); // set leds to output mode
                 sequence_pos = 0;
                 increase_sequence();
+                last_time = millis();
             }
             
+            
             //DISPLAY THE SEQUENCE
-            play_response response = play_led_sequence(updated,LEDS_SEQUENCE[0],LEDS_SEQUENCE[sequence_pos + 1],sequence_pos < sequence_length - 1,disp_led_time,disp_led_delay);
-            if(response.next_led){
-                sequence_pos++;
-            }
-            if(response.ended){ // DISP state ENDED
-                Serial.println("DISP_END");
-                set_state(DISP,false);
-                CURRENT_STATE = CHECK_INPUT;
+            if(millis() - disp_enter_delay > last_time){
+                play_response response = play_led_sequence(updated,LEDS_SEQUENCE[0],LEDS_SEQUENCE[sequence_pos + 1],sequence_pos < sequence_length - 1,disp_led_time,disp_led_delay);
+                if(response.next_led){
+                    sequence_pos++;
+                }
+                if(response.ended){ // DISP state ENDED
+                    Serial.println("DISP_END");
+                    set_state(DISP,false);
+                    CURRENT_STATE = CHECK_INPUT;
+                }
             }
             
             break;
@@ -189,15 +193,72 @@ void loop()
                 sequence_pos = 0;
             }
             
+            bool state_ended = false;
             if(sequence_pos < sequence_length){
+                bool wrong_button_pressed = false;
+                bool button_press_begin = false;
+                bool button_press_end= false;
                 current_led = LEDS_SEQUENCE[sequence_pos];
-                int current_input_button = LED_PINS[current_led];
                 
-                button_response input_response = button_handler(current_input_button,false,true);
-                if(input_response.updated){
-                    if(input_response.status){
-                        tone(BUZZER_PIN,get_buzzer_frequency(current_led),)
+                // CHECK EVERY LED BUTTON
+                for(int i = 0;i<n_pins; i++){
+                    LED_INPUT_RESPONSES[i] = button_handler(LED_PINS[i],false,true);
+                    button_response& input_response = LED_INPUT_RESPONSES[i];
+                    
+                    if(input_response.updated){ // BUTTON STATUS CHANGED
+                        if (i == current_led){ // CORRECT BUTTON WAS PRESSED
+                            if(input_response.status){ // PRESS BEGAN
+                                button_press_begin = true;
+                            }
+                            else{ // PRESS ENDED
+                                button_press_end = true;
+                            }
+                        }
+                        else{ // WRONG BUTTON WAS PRESSED
+                            wrong_button_pressed = true;
+                            break; // SKIP OTHER BUTTONS IF LEFT
+                        }
                     }
+                }
+                
+                //BUTTON PRESS LOGIC
+                if(wrong_button_pressed){ // WRONG BUTTON WAS PRESSED
+                    state_ended = true;
+                }
+                else{ // CORRECT BUTTON OR NO BUTTON WAS PRESSED
+                    if(button_press_begin){ // CORRECT BUTTON PRESS BEGAN
+                        tone(BUZZER_PIN,get_buzzer_frequency(current_led),disp_led_time);
+                    }
+                    if(button_press_end){ // CORRECT BUTTON PRESS ENDED
+                        sequence_pos++;
+                    }
+                }
+            }{
+                state_ended = true;
+            }
+            
+            if(state_ended){
+                Serial.println("CHECK_INPUT_END");
+                set_state(CHECK_INPUT,false);
+                CURRENT_STATE = SEQUENCE_END;
+            }
+            
+            break;
+        }
+    case SEQUENCE_END:
+        {
+            bool updated = set_state(SEQUENCE_END,true);
+            
+            if (updated){ // SEQUENCE_END state BEGAN
+                Serial.println("SEQUENCE_END_BEGIN");
+                set_leds_mode(LED_PINS,n_pins,OUTPUT); // set leds to ouput mode
+                digitalWrite(POWER_PIN,false);
+                
+                if(sequence_pos == sequence_length){ // SEQUENCE COMPLETED
+                    
+                }
+                else{ // GAME LOST
+                    
                 }
             }
             
