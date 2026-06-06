@@ -35,6 +35,13 @@ button_response button_handler(uint8_t button_pin, bool display_input,bool norma
     return button_response{button_status[button_pin],updated};
 }
 
+void force_button_status(int led_pins[], int n, int status)
+{
+    for(int i = 0;i<n;i++){
+        button_status[led_pins[i]] = status;
+    }
+}
+
 //LEDS HANDLER
 led_info::led_info()
 {

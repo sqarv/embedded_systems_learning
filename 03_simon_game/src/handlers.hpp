@@ -7,6 +7,7 @@ struct button_response{
 };
 
 button_response button_handler(uint8_t button_pin, bool display_input,bool normal_logic = false);
+void force_button_status(int led_pins[],int n,int status);
 
 //LEDS
 struct led_info{

@@ -226,7 +226,6 @@ void loop()
                 
                 //BUTTON PRESS LOGIC
                 if(wrong_button_pressed){ // WRONG BUTTON WAS PRESSED
-                Serial.println("WRONG BUTTON WAS PRESSED!");
                     state_ended = true;
                 }
                 else{ // CORRECT BUTTON OR NO BUTTON WAS PRESSED
@@ -245,6 +244,10 @@ void loop()
             if(state_ended){ // CHECK_INPUT state ENDED
                 Serial.println("CHECK_INPUT_END");
                 set_state(CHECK_INPUT,false);
+                digitalWrite(POWER_PIN,false);
+                set_leds_mode(LED_PINS,n_pins,OUTPUT);
+                force_button_status(LED_PINS,n_pins,0); // force every button to off
+                
                 CURRENT_STATE = SEQUENCE_END;
             }
             
@@ -257,7 +260,6 @@ void loop()
             
             if (updated){ // SEQUENCE_END state BEGAN
                 Serial.println("SEQUENCE_END_BEGIN");
-                digitalWrite(POWER_PIN,false);
                 
                 if(sequence_pos == sequence_length){ // SEQUENCE COMPLETED
                     state_ended = true;
