@@ -5,6 +5,7 @@ const unsigned int start_led_time = 200; ///led light duration in start animatio
 const unsigned int disp_led_time = 400;
 const unsigned int disp_led_delay = 200;
 const unsigned int disp_enter_delay = 1000;
+const unsigned int lose_sound_time = 200;
 
 // PINS
 #define POWER_PIN 2

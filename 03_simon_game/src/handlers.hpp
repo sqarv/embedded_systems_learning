@@ -11,7 +11,6 @@ button_response button_handler(uint8_t button_pin, bool display_input,bool norma
 //LEDS
 struct led_info{
   bool status;
-  bool input;
   unsigned int light_duration;
   unsigned long turning_time;
   

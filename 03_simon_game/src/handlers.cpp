@@ -39,7 +39,6 @@ button_response button_handler(uint8_t button_pin, bool display_input,bool norma
 led_info::led_info()
 {
     status = false;
-    input = false;
     turning_time = 0;
     light_duration = 0;
 };
@@ -73,13 +72,11 @@ void turn_led(int led_pin,unsigned int time)
     if (led_pin < n){
         led_info& info = leds[led_pin];
         
-        if (!info.input){
-            info.status = true;
-            info.turning_time = millis();
-            info.light_duration = time;
-            pinMode(led_pin,OUTPUT);
-            digitalWrite(led_pin,HIGH);
-        }
+        info.status = true;
+        info.turning_time = millis();
+        info.light_duration = time;
+        pinMode(led_pin,OUTPUT);
+        digitalWrite(led_pin,HIGH);
     }
 }
 
