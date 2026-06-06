@@ -124,7 +124,6 @@ void loop()
     //LEDS HANDLER
     check_leds(LED_PINS,n_pins,CURRENT_STATE == OFF);
     
-    
     // STATE SWITCH
     switch(CURRENT_STATE)
     {
@@ -134,6 +133,7 @@ void loop()
             
             if (updated){ // START state BEGAN
                 Serial.println("START_BEGIN");
+                set_leds_mode(LED_PINS,n_pins,OUTPUT); // set leds to output mode
             }
             
             //START ANIMATION
@@ -155,6 +155,7 @@ void loop()
             
             if (updated){ // DISP state BEGAN
                 Serial.println("DISP_BEGIN");
+                set_leds_mode(LED_PINS,n_pins,OUTPUT); // set leds to output mode
                 sequence_pos = 0;
                 increase_sequence();
             }
@@ -178,12 +179,9 @@ void loop()
             
             if (updated){ // CHECK_INPUT state BEGAN
                 Serial.println("CHECK_INPUT_BEGIN");
+                set_leds_mode(LED_PINS,n_pins,INPUT); // set leds to input mode
                 digitalWrite(POWER_PIN,HIGH);
                 
-                //set buttons to input
-                for(int i = 0; i < n_pins;i++){
-                    pinMode()
-                }
             }
             
             break;

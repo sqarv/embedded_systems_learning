@@ -44,15 +44,19 @@ led_info::led_info()
 
 led_info leds[n];
 
-void check_leds(int led_pins[],int n, bool force_off,bool input_state){
+void set_leds_mode(int led_pins[], int n, int pin_mode)
+{
+    for(int i = 0;i<n;i++){
+        pinMode(led_pins[i],pin_mode);
+    }
+}
+
+void check_leds(int led_pins[], int n, bool force_off)
+{
     led_info* info;
     
     for(int i = 0; i < n;i++){
         info = leds + led_pins[i];
-        
-        if(input_state){
-            
-        }
         
         if(info->status && (force_off || info->turning_time + info->light_duration < millis())){
             digitalWrite(led_pins[i],LOW);

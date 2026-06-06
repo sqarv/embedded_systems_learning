@@ -18,6 +18,7 @@ struct led_info{
   led_info();
 };
 
+void set_leds_mode(int led_pins[],int n,int pin_mode);
 void check_leds(int led_pins[],int n, bool force_off);
 void turn_led(int led_pin,unsigned int time);
 bool get_led_status(int led_pin);
