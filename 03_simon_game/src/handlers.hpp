@@ -6,7 +6,7 @@ struct button_response{
   bool updated;  
 };
 
-button_response button_handler(uint8_t button_pin, bool display_input);
+button_response button_handler(uint8_t button_pin, bool display_input,bool normal_logic = false);
 
 //LEDS
 struct led_info{

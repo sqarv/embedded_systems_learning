@@ -8,9 +8,12 @@ bool button_status[n];
 unsigned long button_debounce[n];
 unsigned int debounce_time_ms = 100;
 
-button_response button_handler(uint8_t button_pin, bool display_input)
+button_response button_handler(uint8_t button_pin, bool display_input,bool normal_logic)
 {
     bool pressed = !digitalRead(button_pin);
+    if(normal_logic){
+        pressed = !pressed;
+    }
     bool updated = false;
     
     if (pressed != button_status[button_pin] && millis() - button_debounce[button_pin] > debounce_time_ms)

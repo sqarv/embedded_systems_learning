@@ -47,13 +47,18 @@ bool set_state(GameState state,bool status){
     return updated;
 }    
 
+// GET BUZZER FREQUENCY FUNCTION
+int get_buzzer_frequency(int led_idx){
+    int freq_idx = led_idx < n_frequencies ? led_idx : 0;
+    return BUZZER_FREQUENCIES[freq_idx];
+}
+
 // START LED FUNCTION
 unsigned long last_led_start = millis();
 void start_led(int led_idx,unsigned int duration){
     noTone(BUZZER_PIN);
     turn_led(LED_PINS[led_idx],duration);
-    int freq_idx = led_idx < n_frequencies ? led_idx : 0;
-    tone(BUZZER_PIN,BUZZER_FREQUENCIES[freq_idx],duration);
+    tone(BUZZER_PIN,get_buzzer_frequency(led_idx),duration);
     last_led_start = millis();
 }
 
@@ -181,7 +186,19 @@ void loop()
                 Serial.println("CHECK_INPUT_BEGIN");
                 set_leds_mode(LED_PINS,n_pins,INPUT); // set leds to input mode
                 digitalWrite(POWER_PIN,HIGH);
+                sequence_pos = 0;
+            }
+            
+            if(sequence_pos < sequence_length){
+                current_led = LEDS_SEQUENCE[sequence_pos];
+                int current_input_button = LED_PINS[current_led];
                 
+                button_response input_response = button_handler(current_input_button,false,true);
+                if(input_response.updated){
+                    if(input_response.status){
+                        tone(BUZZER_PIN,get_buzzer_frequency(current_led),)
+                    }
+                }
             }
             
             break;
