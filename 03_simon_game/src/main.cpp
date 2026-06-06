@@ -5,6 +5,9 @@
     // MAIN SETUP
 void setup()
 {
+    //random seed
+    srand(analogRead(A0));
+    
     //arduino led
     pinMode(LED_BUILTIN,OUTPUT);
     digitalWrite(LED_BUILTIN,LOW);
@@ -75,7 +78,7 @@ play_response play_led_sequence(bool start_sequence,int first_led,int next_led,b
         start_led(current_led,led_duration);
     }
     else{
-        if (run_condition && !current_led_status && millis() - last_led_start > led_delay){
+        if (run_condition && !current_led_status && millis() - last_led_start > led_delay + led_duration){
             current_led = next_led;
             start_led(current_led,led_duration);
             response.next_led = true;
