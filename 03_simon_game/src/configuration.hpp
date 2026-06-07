@@ -35,6 +35,7 @@ const int BUZZER_FREQUENCIES[] = {
     350, // led_2
     400, // led_3
     450, // led_4
-    200 // off
+    200, // off
+    700 // new highest score
 };
 const int n_frequencies = sizeof(BUZZER_FREQUENCIES) / sizeof(int); // length of buzzer_frequencies vector

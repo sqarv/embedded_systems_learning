@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <LiquidCrystal.h>
+#include <EEPROM.h>
 #include "handlers.hpp"
 #include "configuration.hpp"
 
@@ -9,6 +10,9 @@ LiquidCrystal lcd(13 , 12 , 11 , 10 , 9 , A1);
     
 void setup()
 {
+    // init EEPROM highest score
+    //EEPROM.write(0,0);
+    
     //random seed
     srand(analogRead(A0));
     
@@ -48,6 +52,8 @@ button_response LED_INPUT_RESPONSES[n_pins]; /// button response for led pins
 //other
 unsigned long last_time = millis();
 uint8_t score = 0;
+uint8_t highest = EEPROM.read(0);
+char disp_buffer[17];
 
     //FUNCTIONS
 // SET STATE
@@ -128,7 +134,7 @@ void set_power(bool set_on)
         digitalWrite(LCD_PIN,LOW);
         digitalWrite(LED_BUILTIN,LOW); // BUILDIN LED for debugging
         digitalWrite(POWER_PIN,LOW);
-        tone(BUZZER_PIN,get_buzzer_frequency(n_frequencies),500); // off sound
+        tone(BUZZER_PIN,get_buzzer_frequency(n_frequencies - 1),500); // off sound
         clear_sequence(); // clear the sequence
     }
 }
@@ -159,8 +165,10 @@ void loop()
                 set_leds_mode(LED_PINS,n_pins,OUTPUT); // set leds to output mode
                 
                 //lcd
+                
                 lcd.setCursor(0,0);
-                lcd.print("Loading...");
+                sprintf(disp_buffer,"Loading... %-6s","");
+                lcd.print(disp_buffer);
             }
             
             //START ANIMATION
@@ -187,9 +195,11 @@ void loop()
                 
                 //lcd
                 lcd.setCursor(0,0);
-                lcd.print(String("Highest: "));
+                sprintf(disp_buffer,"Highest: %-7d",highest);
+                lcd.print(disp_buffer);
+                sprintf(disp_buffer,"Score: %-9d",score);
                 lcd.setCursor(0,1);
-                lcd.print(String("Score: ") + String(score));
+                lcd.print(disp_buffer);
             }
             
             //DISPLAY THE SEQUENCE
@@ -287,6 +297,11 @@ void loop()
                     state_ended = true;
                     current_led = 0;
                     score++;
+                    if(score > highest){
+                        tone(BUZZER_PIN,get_buzzer_frequency(n_frequencies),300);
+                        EEPROM.write(0,score);
+                        highest = score;
+                    }
                 }
                 else{ // GAME LOST
                     score = 0;
