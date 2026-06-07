@@ -298,7 +298,7 @@ void loop()
                     current_led = 0;
                     score++;
                     if(score > highest){
-                        tone(BUZZER_PIN,get_buzzer_frequency(n_frequencies),300);
+                        tone(BUZZER_PIN,get_buzzer_frequency(n_frequencies),700);
                         EEPROM.write(0,score);
                         highest = score;
                     }
