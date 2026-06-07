@@ -22,4 +22,4 @@ A memory game where the user must replicate a randomly generated sequence of fla
 
 | Circuit Schematic | Demo |
 | :---: | :---: |
-| <img src="./schematic.png" width="500"> | https://github.com/user-attachments/assets/6cd7cb14-4137-4dc5-80cc-ea65052716c6 |
+| <img src="./schematic.png" width="500"> | <video src="https://github.com/user-attachments/assets/6cd7cb14-4137-4dc5-80cc-ea65052716c6" width="300" controls></video> |
