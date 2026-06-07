@@ -123,6 +123,7 @@ void set_power(bool set_on)
         CURRENT_STATE = START;
         
         score = 0;
+        force_button_status(LED_PINS,n_pins,0); // fix wrong buttons status after closing game in CHECK_INPUT state
         digitalWrite(LCD_PIN,HIGH);
         digitalWrite(LED_BUILTIN,HIGH); // BUILDIN LED for debugging
     }
