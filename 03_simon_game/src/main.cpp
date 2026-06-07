@@ -1,13 +1,22 @@
 #include <Arduino.h>
+#include <LiquidCrystal.h>
 #include "handlers.hpp"
 #include "configuration.hpp"
 
     // MAIN SETUP
+                //RS , E , D4, D5, D6, D7
+LiquidCrystal lcd(13 , 12 , 11 , 10 , 9 , A1);    
+    
 void setup()
 {
     //random seed
     srand(analogRead(A0));
     
+    //lcd setup
+    lcd.begin(16,2);
+    pinMode(LCD_PIN,OUTPUT);
+    digitalWrite(LCD_PIN,LOW);
+     
     //arduino led
     pinMode(LED_BUILTIN,OUTPUT);
     digitalWrite(LED_BUILTIN,LOW);
@@ -38,6 +47,7 @@ int current_led = 0; /// current led index in led_pins array
 button_response LED_INPUT_RESPONSES[n_pins]; /// button response for led pins
 //other
 unsigned long last_time = millis();
+uint8_t score = 0;
 
     //FUNCTIONS
 // SET STATE
@@ -106,6 +116,8 @@ void set_power(bool set_on)
         Serial.println("OFF_END");
         CURRENT_STATE = START;
         
+        score = 0;
+        digitalWrite(LCD_PIN,HIGH);
         digitalWrite(LED_BUILTIN,HIGH); // BUILDIN LED for debugging
     }
     else{
@@ -113,6 +125,7 @@ void set_power(bool set_on)
         Serial.println("OFF_BEGIN");
         CURRENT_STATE = OFF;
         
+        digitalWrite(LCD_PIN,LOW);
         digitalWrite(LED_BUILTIN,LOW); // BUILDIN LED for debugging
         digitalWrite(POWER_PIN,LOW);
         tone(BUZZER_PIN,get_buzzer_frequency(n_frequencies),500); // off sound
@@ -144,6 +157,10 @@ void loop()
             if (updated){ // START state BEGAN
                 Serial.println("START_BEGIN");
                 set_leds_mode(LED_PINS,n_pins,OUTPUT); // set leds to output mode
+                
+                //lcd
+                lcd.setCursor(0,0);
+                lcd.print("Loading...");
             }
             
             //START ANIMATION
@@ -167,8 +184,13 @@ void loop()
                 current_led = -1;
                 increase_sequence();
                 last_time = millis();
+                
+                //lcd
+                lcd.setCursor(0,0);
+                lcd.print(String("Highest: "));
+                lcd.setCursor(0,1);
+                lcd.print(String("Score: ") + String(score));
             }
-            
             
             //DISPLAY THE SEQUENCE
             if(millis() - disp_enter_delay > last_time){
@@ -264,8 +286,10 @@ void loop()
                 if(sequence_pos == sequence_length){ // SEQUENCE COMPLETED
                     state_ended = true;
                     current_led = 0;
+                    score++;
                 }
                 else{ // GAME LOST
+                    score = 0;
                     current_led = n_pins;
                     last_time = millis();
                     clear_sequence();

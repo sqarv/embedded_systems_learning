@@ -8,11 +8,12 @@ const unsigned int disp_enter_delay = 1000;
 const unsigned int lose_sound_time = 200;
 
 // PINS
+#define LCD_PIN 16
 #define POWER_PIN 2
 #define BUZZER_PIN 3
 #define POWER_BUTTON 4
 
-// LED PI
+// LED PINS
 #define RED_LED 5
 #define YELLOW_LED 6
 #define GREEN_LED 7
