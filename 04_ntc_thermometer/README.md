@@ -11,4 +11,4 @@ A real-time ambient temperature thermometer that processes raw analog signals fr
 
 | Circuit Schematic | Setup |
 | :---: | :---: |
-| <img src="./schematic.png" width="500"> | <img src="./setup.jpeg" width="500"> |
+| <img src="./schematic.png" width="500"> | <img src="./setup.png" width="500"> |
